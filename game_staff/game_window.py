@@ -1,5 +1,5 @@
 # Імпорт зі скрипту screens.py екрани Меню та для тестів
-from .screens import MenuScreen, TestScreen
+from .screens import MenuScreen, GameScreen
 import pygame
 pygame.init()
 
@@ -15,13 +15,14 @@ class GameWindow():
         # Таймер, який буде оновлювати гру та FPS
         self.clock = pygame.time.Clock()
         self.FPS = framerate
+        self.delta = 0
 
         # Створення екранів меню та тестового
-        self.test_screen = TestScreen(self)
+        self.game_screen = GameScreen(self)
         self.menu_screen = MenuScreen(self)
 
-        # Додання події до кнопки в екрані меню для переходу на тестовий екран
-        self.menu_screen.button.add_action(self.test_screen.set_screen)
+        # # Додання події до кнопки в екрані меню для переходу на тестовий екран
+        # self.menu_screen.button.add_action(self.test_screen.set_screen)
 
         # Поточний екран
         self.current_screen = self.menu_screen
@@ -36,4 +37,5 @@ class GameWindow():
     # Оновлення вікна
     def update_window(self):
         pygame.display.update()
-        self.clock.tick(self.FPS)
+        self.delta = self.clock.tick(self.FPS)/10
+        # print(self.clock.get_fps())

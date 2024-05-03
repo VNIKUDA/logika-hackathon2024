@@ -48,7 +48,7 @@ class Button(Image):
     # Обробник подій, який перевіряє чи не була натиснута кнопка
     def check_if_pressed(self, event):
         # Якщо було натиснуто ліву кнопку миші
-        if event.button == 1:
+        if event.button == 1 and self.click_area_mask.get_rect(topleft=self.position, size=self.image.get_size()).collidepoint(event.pos):
             # Позиція кліку мишки відносно маски (бо маска не враховує свою позицію, тобто початок завжди з (0, 0))
             check_pos = event.pos[0] - self.position[0], event.pos[1] - self.position[1]
 
