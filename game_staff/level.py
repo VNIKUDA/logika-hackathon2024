@@ -17,21 +17,28 @@ class Block():
         self.size = size
 
         # Текстурка блока
-        self.image = Image(path_to_image, size, position)
+        self.image = Image(path_to_image, size, position).image
 
         # Reсt - потрібен для колізії зi спрайтами
         self.rect = pygame.Rect(position, size)
         
         # Функція для відмальовки блока
-        self.draw = self.image.draw
+        # self.draw = self.image.draw
+
+    def draw(self, surface, offset):
+        surface.blit(self.image, offset(self))
+
+    @property
+    def texture(self):
+        return self.image.image
 
 
 # Клас рівня
 class Level():
     # Конструктор класу
     # Приймає параметри path_to_level(шлях до файлу який зберігає інфу про рівень), block_size(розмір одного блока), 
-    # level_textures_mapping(словник типу { символ: шлях_до_текстурки } )
-    def __init__(self, path_to_level, block_size, level_textures_mapping: dict):
+    # player(символ позиція гравця), level_textures_mapping(словник типу { символ: шлях_до_текстурки } )
+    def __init__(self, path_to_level, block_size, player, level_textures_mapping: dict):
         # Список блоків рівня
         self.level = []
 
@@ -42,17 +49,30 @@ class Level():
         with open(path_to_level, "r") as level:
             # y - індекс який представляє y, row - строка файлу
             for y, row in enumerate(level.readlines()):
-                # X - індекс який представляє x, block - символ
-                for x, block in enumerate(row.split()):
+                # X - індекс який представляє x, symbol - символ
+                for x, symbol in enumerate(row.split()):
                     # Якщо символ не є заглушкою, то створити блок
-                    if block in level_textures_mapping:
+                    if symbol in level_textures_mapping:
                         self.level.append(Block(position=(x*block_width, y*block_height), size=block_size,
-                                                path_to_image=level_textures_mapping[block]))
+                                                path_to_image=level_textures_mapping[symbol]))
+                        
+                    elif symbol == player:
+                        self.player_position = x*block_width, y*block_height
+                        
+
+        self.width = max([block.rect.right for block in self.level])
+        self.height = max([block.rect.bottom for block in self.level])
+
+        print(self.width, self.height)
+
+    def is_on_surface(self, surface, offset, object):
+        return surface.get_rect().colliderect(offset(object))
 
     # Відмальовка рівня
-    def draw(self, surface):
+    def draw(self, surface, offset):
         for block in self.level:
-            block.draw(surface)
+            if self.is_on_surface(surface, offset, block):
+                block.draw(surface, offset)
 
 # Клас для контролю рівнями
 class LevelManager():

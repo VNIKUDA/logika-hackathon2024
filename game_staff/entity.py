@@ -120,9 +120,16 @@ class Entity():
 		self.rect.x += dx
 		self.rect.y += dy
 	
+	# Перевірає чи треба відмальовувати сутність на екрані
+	def is_on_surface(self, surface, offset):
+		return surface.get_rect().colliderect(offset(self))
 
 	# Відмальовуванння сутності
-	def draw(self, surface):
-		surface.blit(self.current_animation.current_sprite, self.rect)
+	def draw(self, surface, offset):
+		if self.is_on_surface(surface, offset):
+			surface.blit(self.current_animation.current_sprite, offset(self))
 		# pygame.draw.rect(surface, (255, 0, 255), self.rect)
         
+	@property
+	def texture(self):
+		return self.current_animation.current_sprite

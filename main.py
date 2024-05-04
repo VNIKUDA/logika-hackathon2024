@@ -18,7 +18,7 @@ window = GameWindow(window_size=window_size, title="dead cells (parody)")
 while window.open:
     # Обробник подій
     for event in pygame.event.get():
-        # Якщо було закрито вікно то закінчити роботу програми
+        # Якщо було закрито вікно то закінчити роботу програмиw
         if event.type == pygame.QUIT:
             window.close()
 

@@ -3,6 +3,7 @@ from .game_config import GameConfig # Конфіг гри (для легшої �
 from .user_interface import Image, Button # Клас картинки та кнопки
 from .player import Player
 from .level import LevelManager, Level
+from .camera import Camera
 from abc import abstractmethod # декоратор для абстрактного метода
 import pygame
 pygame.init()
@@ -76,20 +77,29 @@ class GameScreen(Screen):
 
         # Об'єкт для менеджменту рівнів + додання рівня
         self.level_manager = LevelManager()
-        self.level_manager.add_level("first", Level("level.txt", (100, 100), {"B": "game_assets\\images\\block.png"}))
+        self.level_manager.add_level("first", Level("level.txt", (100, 100), "P", {"B": "game_assets\\images\\block.png"}))
 
         # Гравець
         self.player = Player(position=(0, -1), size=(100, 200), animation_time=10, animation_sprite_size=16, level_manager=self.level_manager, temp="game_assets\\images\\player.png")
+        self.player.rect.topleft = self.level_manager.current_level.player_position
+
+        # Камера
+        self.camera = Camera(self.level_manager)
+        self.camera.set_target(self.player)
+
 
     # Оновлення екрана
     def update_screen(self):
         self.player.update(self.window.delta)
+        self.camera.update()
 
     # Відмальовування екрана
     def draw(self):
         self.window_surface.fill((0,0,0,0))
-        self.player.draw(self.window_surface)
-        self.level_manager.current_level.draw(self.window_surface)
+        # self.player.draw(self.window_surface)
+        # self.level_manager.current_level.draw(self.window_surface)
+
+        self.camera.draw(self.window_surface)
 
     # Обробник подій екрана
     def events(self, event):
