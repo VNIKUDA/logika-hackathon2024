@@ -1,5 +1,5 @@
 # Імпорт зі скрипту screens.py екрани Меню та для тестів
-from .screens import MenuScreen, GameScreen
+from .screens import MenuScreen, GameScreen, PauseScreen
 import pygame
 pygame.init()
 
@@ -18,6 +18,7 @@ class GameWindow():
         self.delta = 0
 
         # Створення екранів меню та тестового
+        self.pause_screen = PauseScreen(self)
         self.game_screen = GameScreen(self)
         self.menu_screen = MenuScreen(self)
 
@@ -38,4 +39,3 @@ class GameWindow():
     def update_window(self):
         pygame.display.update()
         self.delta = self.clock.tick(self.FPS)/10
-        # print(self.clock.get_fps())

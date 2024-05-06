@@ -1,0 +1,1 @@
+["HI adventurer! My name is NPC.", "NPC TEXT NPC TEXT NPC TEXT NPC TEXT ", "Bye"]

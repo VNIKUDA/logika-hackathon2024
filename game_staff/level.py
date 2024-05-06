@@ -26,7 +26,7 @@ class Block():
         # self.draw = self.image.draw
 
     def draw(self, surface, offset):
-        surface.blit(self.image, offset(self))
+        surface.blit(self.image, offset(self.rect))
 
     @property
     def texture(self):
@@ -38,12 +38,18 @@ class Level():
     # Конструктор класу
     # Приймає параметри path_to_level(шлях до файлу який зберігає інфу про рівень), block_size(розмір одного блока), 
     # player(символ позиція гравця), level_textures_mapping(словник типу { символ: шлях_до_текстурки } )
-    def __init__(self, path_to_level, block_size, player, level_textures_mapping: dict):
+    def __init__(self, path_to_level, block_size, player, npcs: dict, level_textures_mapping: dict, path_to_background):
         # Список блоків рівня
         self.level = []
 
+        
+
         # Ширина та висота одного блока
         block_width, block_height = block_size
+
+        self.npcs = npcs
+
+        self.npc = None
 
         # Зчитування файлу рівня та створення самого рівня з блоків
         with open(path_to_level, "r") as level:
@@ -63,15 +69,16 @@ class Level():
         self.width = max([block.rect.right for block in self.level])
         self.height = max([block.rect.bottom for block in self.level])
 
-        print(self.width, self.height)
+        self.background = Image(path_to_background, (self.width, self.height)).image
 
-    def is_on_surface(self, surface, offset, object):
-        return surface.get_rect().colliderect(offset(object))
+    def is_on_surface(self, surface, object, offset=lambda rect: rect):
+        return surface.get_rect().colliderect(offset(object.rect))
 
     # Відмальовка рівня
     def draw(self, surface, offset):
+        surface.blit(self.background, offset(self.background.get_rect()))
         for block in self.level:
-            if self.is_on_surface(surface, offset, block):
+            if self.is_on_surface(surface, block, offset):
                 block.draw(surface, offset)
 
 # Клас для контролю рівнями

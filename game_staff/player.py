@@ -1,5 +1,5 @@
 # Імпорт модулів/скриптів
-# Клас Sprite є батьківським класом для всіх сутностей, Vector2 це просто скорочення pygame.Vector2
+# Клас Entity є батьківським класом для всіх сутностей, Vector2 це просто скорочення pygame.Vector2
 from .entity import Entity, Vector2 
 import pygame
 pygame.init()
@@ -10,8 +10,8 @@ class Player(Entity):
     # def __init__(self, position, size, animation_time, **animations):
     #     super().__init__(position, size, animation_time, **animations)
 		
-    # Взаємодія з гравцем
-    def interaction(self):
+    # Переміщення гравця
+    def movement(self):
         # Встановлення напрямку по осі x до 0
         self.x_direction = 0
 
@@ -32,8 +32,15 @@ class Player(Entity):
             self.y_velocity = -8
             self.is_standing = False
 
+    # Обробник подій гравця
+    def interaction(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_e:
+                npc = self.level_manager.current_level.npc
+                if npc.interaction_rect.colliderect(self.rect):
+                    self.level_manager.current_level.npc.dialoge()
 
     # Онволення гравця
-    def update(self, delta):
-        self.interaction()
-        super().update(delta)
+    def update(self, delta, surface, offset):
+        self.movement()
+        super().update(delta, surface, offset)
