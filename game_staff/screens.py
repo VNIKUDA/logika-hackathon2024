@@ -83,19 +83,30 @@ class PauseScreen(Screen):
         # Фон паузи
         self.background = Image("game_assets\\images\\dead cells.jpg", config.get_window_size())
 
+        self.reset_level_button = Button("game_assets\\images\\button.png", (300, 100), (100, 100))
+
     # Оновлення  екрана
     def update_screen(self):
-        pass
+        self.reset_level_button.actions = []
+        self.reset_level_button.add_action(self.window.game_screen.level_manager.current_level.load_level)
+        self.reset_level_button.add_action(self.window.game_screen.set_screen)
+
 
     # Відмальовування екрана
     def draw(self):
         self.background.draw(self.window_surface)
+        self.reset_level_button.draw(self.window_surface)
 
     # Обробник подій екрана
     def events(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.window.game_screen.set_screen()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.reset_level_button.check_if_pressed(event)
+        if event.type == pygame.MOUSEMOTION:
+            self.reset_level_button.check_if_hovered(event)
 
 # Клас ігрового еркану
 class GameScreen(Screen):
@@ -104,29 +115,32 @@ class GameScreen(Screen):
 
         # Об'єкт для менеджменту рівнів + додання рівня
         self.level_manager = LevelManager()
-        self.level_manager.add_level("first", Level("level.txt", (100, 100), "P", {}, {"B": "game_assets\\images\\block.png"}, "game_assets\\images\\background.png"))
+        # self.level_manager.add_level("first", Level("level.txt", (100, 100), "P", {}, {"B": "game_assets\\images\\block.png"}, "game_assets\\images\\background.png"))
 
         # Гравець
         self.player = Player(position=(0, -1), size=(100, 200), animation_time=100, animation_sprite_size=16, level_manager=self.level_manager, main="game_assets\\images\\player.png")
-        self.player.rect.topleft = self.level_manager.current_level.player_position
+        # self.player.rect.topleft = self.level_manager.current_level.player_position
+
+        self.level_manager.load_levels(level_directory="levels", player=self.player)
 
         # NPC
-        self.npc = NPC(position=(0, 0), size=(100, 200), animation_time=10, animation_sprite_size=16, level_manager=self.level_manager, path_to_phrases="phrases.txt", player=self.player, main="game_assets\\images\\npc.png")
-        self.npc.rect.topleft = self.level_manager.current_level.player_position[0] - 200, self.level_manager.current_level.player_position[1]
-        self.npc.update_dialoge_elements()
-        self.level_manager.current_level.npc = self.npc
+        # self.npc = NPC(position=(0, 0), size=(100, 200), animation_time=10, animation_sprite_size=16, level_manager=self.level_manager, path_to_phrases="phrases.txt", player=self.player, main="game_assets\\images\\npc.png")
+        # self.npc.rect.topleft = self.level_manager.current_level.player_position[0] - 200, self.level_manager.current_level.player_position[1]
+        # self.npc.update_dialoge_elements()
+        # self.level_manager.current_level.npc = self.npc
 
         # Камера
         self.camera = Camera(self.level_manager)
         self.camera.set_target(self.player)
-        self.camera.add_object(self.npc)
+        # self.camera.add_object(self.npc)
 
 
     # Оновлення екрана
     def update_screen(self):
         self.player.update(self.window.delta, self.window_surface, self.camera.apply_offset)
         self.camera.update()
-        self.npc.update_dialoge_elements()
+        for npc in self.level_manager.current_level.npcs:
+            npc.update_dialoge_elements()
 
     # Відмальовування екрана
     def draw(self):
@@ -143,4 +157,5 @@ class GameScreen(Screen):
             if event.key == pygame.K_ESCAPE:
                 self.window.pause_screen.set_screen()
 
+    
         

@@ -1,11 +1,13 @@
 # Імпорт матеріалів з скриптів
 from .user_interface import Image # клас для легшої роботи з зображенням
+from .npc import NPC
 import pygame
+import os
+import json
 pygame.init()
 
 # Скорочення для pygame.Vector2 (так краще сприймається, суто для легшої роботи)
 Vector2 = pygame.Vector2
-
 
 # Клас для об'єкту рівня по якому можна ходити і в який можна упиратись
 class Block():
@@ -38,38 +40,61 @@ class Level():
     # Конструктор класу
     # Приймає параметри path_to_level(шлях до файлу який зберігає інфу про рівень), block_size(розмір одного блока), 
     # player(символ позиція гравця), level_textures_mapping(словник типу { символ: шлях_до_текстурки } )
-    def __init__(self, path_to_level, block_size, player, npcs: dict, level_textures_mapping: dict, path_to_background):
+    # def __init__(self, path_to_level, block_size, player, npcs: dict, level_textures_mapping: dict, path_to_background):
+    def __init__(self, path_to_level, player, level_manager):
         # Список блоків рівня
         self.level = []
+        self.npcs = []
 
-        
+        self.player = player
+        self.level_manager = level_manager
+
+        # Зчитування файлу рівня
+        with open(path_to_level, "r") as level_file:
+            self.level_file = level_file.read()
+
+        # Конфіг(параметри) створення рівня і схема рівня
+        self.level_config = self.level_file.split("//")[0]
+        self.level_config = json.loads("".join(self.level_config.split()))
+        self.level_scheme = self.level_file.split("//")[1]
+
+        # Конфіг створення NPC
+        self.npcs_config = self.level_config["npcs_config"]
+
+        self.blocks_config = self.level_config["blocks_config"]
 
         # Ширина та висота одного блока
-        block_width, block_height = block_size
+        self.block_width, self.block_height = self.block_size = tuple(self.level_config["blocks_config"]["block_size"])
 
-        self.npcs = npcs
-
-        self.npc = None
-
-        # Зчитування файлу рівня та створення самого рівня з блоків
-        with open(path_to_level, "r") as level:
-            # y - індекс який представляє y, row - строка файлу
-            for y, row in enumerate(level.readlines()):
-                # X - індекс який представляє x, symbol - символ
-                for x, symbol in enumerate(row.split()):
-                    # Якщо символ не є заглушкою, то створити блок
-                    if symbol in level_textures_mapping:
-                        self.level.append(Block(position=(x*block_width, y*block_height), size=block_size,
-                                                path_to_image=level_textures_mapping[symbol]))
-                        
-                    elif symbol == player:
-                        self.player_position = x*block_width, y*block_height
-                        
+        self.load_level()                        
 
         self.width = max([block.rect.right for block in self.level])
         self.height = max([block.rect.bottom for block in self.level])
 
-        self.background = Image(path_to_background, (self.width, self.height)).image
+        self.background = Image(self.level_config["path_to_background"], (self.width, self.height)).image
+
+    def load_level(self):
+        self.level = []
+        self.npcs = []
+        # y - індекс який представляє y, row - строка файлу
+        for y, row in enumerate(self.level_scheme.splitlines()):
+            # X - індекс який представляє x, symbol - символ
+            for x, symbol in enumerate(row.split()):
+                # Якщо символ не є заглушкою, то створити блок
+                if symbol in self.blocks_config:
+                    self.level.append(Block(position=(x*self.block_width, y*self.block_height), size=self.block_size,
+                                            path_to_image=self.blocks_config[symbol]))
+                    
+                elif symbol in self.npcs_config:
+                    npc = self.npcs_config[symbol]
+                    self.npcs.append(
+                        NPC(
+                            position=(x*self.block_width, y*self.block_height), size=tuple(self.npcs_config["npc_size"]), animation_time=npc["animation_time"], animation_sprite_size=npc["animation_sprite_size"],level_manager=self.level_manager, player=self.player, path_to_phrases=npc["path_to_phrases"], **npc["animations"]
+                        )
+                    )
+
+                elif symbol == self.level_config["player"]:
+                    self.player.rect.topleft = x*self.block_width, y*self.block_height
 
     def is_on_surface(self, surface, object, offset=lambda rect: rect):
         return surface.get_rect().colliderect(offset(object.rect))
@@ -80,6 +105,10 @@ class Level():
         for block in self.level:
             if self.is_on_surface(surface, block, offset):
                 block.draw(surface, offset)
+        
+        for npc in self.npcs:
+            if self.is_on_surface(surface, npc, offset):
+                npc.draw(surface, offset)
 
 # Клас для контролю рівнями
 class LevelManager():
@@ -91,6 +120,20 @@ class LevelManager():
 
         # Поточний рівень
         self.current_level: Level
+
+
+    def load_levels(self, level_directory, player):
+        self.levels = {}
+        # Обробка файлів та створення рівнів
+        level_files = os.listdir(level_directory)
+        for level_file in level_files:
+            name = level_file.split(".")[0]
+            self.add_level(name=name,
+                           level=Level(f"{level_directory}\\{level_file}", player, self))
+
+    # Встановлення поточного рівня
+    def set_current_level(self, name):
+        self.current_level = self.levels[name]
 
     # Додання рівня
     def add_level(self, name, level):

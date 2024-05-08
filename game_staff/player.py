@@ -36,9 +36,9 @@ class Player(Entity):
     def interaction(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_e:
-                npc = self.level_manager.current_level.npc
-                if npc.interaction_rect.colliderect(self.rect):
-                    self.level_manager.current_level.npc.dialoge()
+                for npc in self.level_manager.current_level.npcs:
+                    if npc.interaction_rect.colliderect(self.rect):
+                        npc.dialoge()
 
     # Онволення гравця
     def update(self, delta, surface, offset):

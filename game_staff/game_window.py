@@ -18,8 +18,8 @@ class GameWindow():
         self.delta = 0
 
         # Створення екранів меню та тестового
-        self.pause_screen = PauseScreen(self)
         self.game_screen = GameScreen(self)
+        self.pause_screen = PauseScreen(self)
         self.menu_screen = MenuScreen(self)
 
         # # Додання події до кнопки в екрані меню для переходу на тестовий екран
