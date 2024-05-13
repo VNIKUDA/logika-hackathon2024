@@ -4,6 +4,7 @@ from .game_config import GameConfig
 import pygame
 pygame.init()
 
+# Конфіг гри
 config = GameConfig()
 
 # Вікно гри
@@ -19,11 +20,12 @@ class GameWindow():
         self.FPS = framerate
         self.delta = 0
 
+        # Плашка завантаження щоб прикрити довге завантаження рівнів
         loading = pygame.font.Font(None, 100).render("Завантажується...", True, (235, 235, 235))
         self.window_surface.blit(loading, (window_size[0]/2 - loading.get_width()/2, window_size[1]/2 - loading.get_height()/2))
         self.update_window()
 
-        # Створення екранів меню та тестового
+        # Створення екранів
         self.pause_screen = PauseScreen(self)
         self.dead_screen = DeadScreen(self)
         self.game_screen = GameScreen(self)
@@ -38,6 +40,7 @@ class GameWindow():
         # Змінна, яка відображає стан вікна
         self.open = True
 
+    # Перезапуск гри з початку
     def restart_game(self):
         player_health = self.game_screen.player.health
         config.load_progress("new_game.json")
@@ -53,9 +56,6 @@ class GameWindow():
         self.about_screen = AboutScreen(self)
         self.authors_screen = AuthorsScreen(self)
         self.menu_screen = MenuScreen(self)
-
-        
-        
 
     # Закриття вікна
     def close(self):

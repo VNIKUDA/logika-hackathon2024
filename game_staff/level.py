@@ -44,12 +44,13 @@ class Level():
     # player(символ позиція гравця), level_textures_mapping(словник типу { символ: шлях_до_текстурки } )
     # def __init__(self, path_to_level, block_size, player, npcs: dict, level_textures_mapping: dict, path_to_background):
     def __init__(self, path_to_level, player, level_manager):
-        # Список блоків рівня
+        # Списки елементів рівня
         self.level = []
         self.npcs = []
         self.enemies = []
         self.portals = []
 
+        # Гравець та менеджер рівнів
         self.player = player
         self.level_manager = level_manager
 
@@ -62,7 +63,7 @@ class Level():
         self.level_config = json.loads("".join(self.level_config.split()))
         self.level_scheme = self.level_file.split("//")[1].strip()
 
-        # Конфіг створення NPC
+        # Конфіг створення елементів рівня
         self.npcs_config = self.level_config["npcs_config"]
         self.enemies_config = self.level_config["enemies_config"]
         self.blocks_config = self.level_config["blocks_config"]
@@ -71,14 +72,19 @@ class Level():
         # Ширина та висота одного блока
         self.block_width, self.block_height = self.block_size = tuple(self.level_config["blocks_config"]["block_size"])
 
+        # Генерування рівня
         self.load_level()                        
 
+        # Ширина та висота рівня
         self.width = max([block.rect.right for block in self.level])
         self.height = max([block.rect.bottom for block in self.level])
 
+        # Фон рівня
         self.background = Image(self.level_config["path_to_background"], (self.width, self.height)).image
 
+    # Генерування рівня (з конфіга та схеми)
     def load_level(self):
+        # Очищення елементів рівня
         self.level = []
         self.npcs = []
         self.enemies = []
@@ -93,6 +99,7 @@ class Level():
                     self.level.append(Block(position=(x*self.block_width, y*self.block_height), size=self.block_size,
                                             path_to_image=self.blocks_config[symbol]))
                     
+                # Створення ворогів
                 elif symbol in self.enemies_config:
                     enemy = self.enemies_config[symbol]
                     self.enemies.append(
@@ -101,6 +108,7 @@ class Level():
                         )
                     )
 
+                # Створення НПС
                 elif symbol in self.npcs_config:
                     npc = self.npcs_config[symbol]
                     self.npcs.append(
@@ -109,6 +117,7 @@ class Level():
                         )
                     )
 
+                # Створення порталів
                 elif symbol in self.portals_config:
                     portal = self.portals_config[symbol]
 
@@ -119,51 +128,61 @@ class Level():
                         )
                     )
 
- 
+                # Позиція гравця в рівні
                 elif symbol == self.level_config["player"]:
                     self.player.rect.topleft = x*self.block_width, y*self.block_height
 
+    # Перевірка чи є об'єкт на екрані
     def is_on_surface(self, surface, object, offset=lambda rect: rect):
         return surface.get_rect().colliderect(offset(object.rect))
     
+    # Оновлення рівня
     def update(self, delta, offset):
+        # Оновлення ворогів
         for enemy in self.enemies:
-            # if self.is_on_update_area(update_area, enemy, offset):
+            # Переміщення ворога
             enemy.x_direction = 0
             if not enemy.is_attacking:
                 enemy.move_to_player(offset)
             enemy.update(delta)
 
-
+            # Видалення ворога якщо він переможений
             if enemy.health <= 0:
                 self.enemies.remove(enemy)
 
                 self.player.increase_health(1)
                 self.player.increase_damage(0.5)
 
+            # Атака ворога
             if enemy.is_attacking: 
                 enemy.attack()
 
+        # Оновлення меню діалогу НПС
         for npc in self.npcs:
             # if self.is_on_update_area(update_area, npc, offset):
             npc.update_dialoge_elements()
 
     # Відмальовка рівня
     def draw(self, surface, offset):
-        surface.blit(self.background, offset(self.background.get_rect()))
+        surface.blit(self.background, offset(self.background.get_rect())) # фон
+
+        # Відмальовка блоків рівня
         for block in self.level:
             if self.is_on_surface(surface, block, offset):
                 block.draw(surface, offset)
 
+        # Відмальовка порталів якщо на нірні не залишилось ворогів
         if self.enemies == []:
             for portal in self.portals:
                 if self.is_on_surface(surface, portal, offset):
                     portal.draw(surface, offset)
         
+        # Відмальовка НПС
         for npc in self.npcs:
             if self.is_on_surface(surface, npc, offset):
                 npc.draw(surface, offset)
 
+        # Відмальовка ворогів
         for enemy in self.enemies:
             if self.is_on_surface(surface, enemy, offset):
                 enemy.draw(surface, offset)

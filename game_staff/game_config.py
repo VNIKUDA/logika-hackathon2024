@@ -37,13 +37,14 @@ class GameConfig():
     def get_window_size(self):
         return self.window_width, self.window_height
     
+    # Завантаження прогесу гри
     def load_progress(self, file):
         with open(file, "r") as file:
             self.game_data = json.load(file)
 
+    # Завантаження конфігу гри
     def load_config(self, file):
-        with open(file, "r") as file:
-            self.game_data = json.load(file)
+        self.load_progress(file)
 
         self.controls_type = self.game_data["controls"]
         if self.game_data["controls"] == "Arrows":
@@ -53,6 +54,7 @@ class GameConfig():
                 "Jump": pygame.K_UP
             }
 
+    # Збереження конфігу гри
     def save_config(self, file, game_screen):
         data = {}
 

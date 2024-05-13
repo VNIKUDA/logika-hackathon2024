@@ -74,6 +74,7 @@ class Entity():
 		self.y_velocity = 0
 		self.speed = 5
 
+		# Напрямок, куди сутність дивиться
 		self.direction = 1
 
 		# rect для роботи з колізією та переміщенням
