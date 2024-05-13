@@ -19,7 +19,7 @@ class Animation():
 		self.sprites = []
 		for index in range(0, spritesheet.get_width() // sprite_size):
 			# Поверхня нового спрайта
-			sprite = pygame.Surface((sprite_size, spritesheet.get_height()))
+			sprite = pygame.Surface((sprite_size, spritesheet.get_height()), flags=pygame.SRCALPHA)
 			sprite.fill((0,0,0,0))
 
 			# Відмаловка частини спрайт-листа, де знаходиться спрайт 
@@ -28,6 +28,7 @@ class Animation():
 			# Додання до спрайтів
 			self.sprites.append(sprite.convert_alpha())
 
+		self.cycles = 0
 		self.animation_tick = 0 # лічильник, який визначає коли який спрайт відмальовувати
 		self.sprite_time = sprite_time # кількість кадрів для відмальовки спрайта
 		self.current_sprite = self.sprites[0] # поточний спрайт
@@ -41,7 +42,7 @@ class Animation():
 
 		self.sprites = sprites
 		self.current_sprite = self.sprites[0]
-		
+
 	# Відтворення анімації
 	def animate(self):
 		self.animation_tick += 1
@@ -49,6 +50,7 @@ class Animation():
 		# Зброс лічильника анімації
 		if self.animation_tick >= len(self.sprites)*self.sprite_time:
 			self.animation_tick = 1
+			self.cycles += 1
 
 		# Встановлення поточного спрайта
 		self.current_sprite = self.sprites[self.animation_tick // self.sprite_time]
@@ -59,7 +61,7 @@ class Entity():
 	# Конструктор класа
 	# Приймає параметри position(позиція сутності), size(розмір сутності), animation_time(кілкість кадрів для 
 	# відмальовки спрайта), level_manager(менеджер рівнів), kwarg-параметер animations(словник типу назва:шлях_до_спрайт-листа)
-	def __init__(self, position, size, animation_time, animation_sprite_size, level_manager, **animations):
+	def __init__(self, position, size, animation_time, level_manager, **animations):
 		# Позиція та розмір сутності
 		self.position = Vector2(position)
 		self.size = size
@@ -72,22 +74,26 @@ class Entity():
 		self.y_velocity = 0
 		self.speed = 5
 
+		self.direction = 1
+
 		# rect для роботи з колізією та переміщенням
 		self.rect = pygame.Rect(self.position, self.size)
  
 		# Завантаження анімацій
 		self.animations = {}
-		for name, path_to_spritesheet in animations.items():
-			animation = Animation(path_to_spritesheet, animation_sprite_size, animation_time)
+		for name, animation in animations.items():
+			animation = Animation(animation["path"], animation["sprite_size"], animation_time)
 			animation.resize(self.size)
 			self.animations[name] = animation
 
 		# Поточна анімація
 		self.current_animation: Animation = list(self.animations.values())[0]
 
+		self.display_sprite = self.current_animation.current_sprite
+
 
 	# Оновлення сутності (гравітація, колізія, переміщення)
-	def update(self, delta, surface, offset):
+	def update(self, delta):
 		# зміщення від поточної позиції
 		dx = round(self.x_direction * self.speed * delta)
 		dy = round(self.y_velocity * delta)
@@ -98,31 +104,32 @@ class Entity():
 
 		# Колізія з рівнем
 		for block in self.level_manager.current_level.level:
-			if self.level_manager.current_level.is_on_surface(surface, block, offset):
-				# Перевірка колізії по осі x
-				if block.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.w, self.rect.h):
-					# dx = 0
-					if self.x_direction < 0:
-						dx = block.rect.right - self.rect.left
+			# if self.level_manager.current_level.is_on_update_area(update_area, block, offset):
+			# Перевірка колізії по осі x
+			if block.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.w, self.rect.h):
+				# dx = 0
+				if self.x_direction < 0:
+					dx = block.rect.right - self.rect.left
 
-					elif self.x_direction > 0:
-						dx = block.rect.left - self.rect.right
+				elif self.x_direction > 0:
+					dx = block.rect.left - self.rect.right
 
-				# Перевірка колізії по осі y
-				if block.rect.colliderect(self.rect.x, self.rect.y + dy, self.rect.w, self.rect.h):
-					if self.y_velocity < 0:
-						self.y_velocity = 0.00000000000000001
-						dy = block.rect.bottom - self.rect.top
+			# Перевірка колізії по осі y
+			if block.rect.colliderect(self.rect.x, self.rect.y + dy, self.rect.w, self.rect.h):
+				if self.y_velocity < 0:
+					self.y_velocity = 0.00000000000000001
+					dy = block.rect.bottom - self.rect.top
 
-					elif self.y_velocity >= 0:
-						self.y_velocity = 0
-						dy = block.rect.top - self.rect.bottom
+				elif self.y_velocity >= 0:
+					self.y_velocity = 0
+					dy = block.rect.top - self.rect.bottom
+		
 
 		# Переміщення гравця по зміщенню
 		self.rect.x += dx
 		self.rect.y += dy
 
-		self.current_animation.animate()
+		
 	
 	# Перевірає чи треба відмальовувати сутність на екрані
 	def is_on_surface(self, surface, offset):
@@ -131,7 +138,7 @@ class Entity():
 	# Відмальовуванння сутності
 	def draw(self, surface, offset):
 		if self.is_on_surface(surface, offset):
-			surface.blit(self.current_animation.current_sprite, offset(self.rect))
+			surface.blit(self.display_sprite, offset(self.rect))
 		# pygame.draw.rect(surface, (255, 0, 255), self.rect)
         
 	@property

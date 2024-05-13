@@ -13,6 +13,7 @@ class Camera():
     def __init__(self, level_manager):
         # Ширина та висота вікна
         self.width, self.height = config.get_window_size()
+        # self.width, self.height = self.width*1.5, self.height*1.5
 
         # Менеджер рівнів та ціль для камери(по замовчуваню None)
         self.level_manager = level_manager
@@ -22,9 +23,7 @@ class Camera():
         # Область камери 
         self.camera = pygame.Rect(0, 0, self.width, self.height)
 
-    # Додавання об'єкта
-    # def add_object(self, object):
-    #     self.objects.append(object)
+        self.update_area = pygame.Rect(-self.width*0.2, -self.height*0.2, self.width*1.4, self.height*1.4)
 
     # Встановити ціль камери
     def set_target(self, target):
@@ -40,7 +39,10 @@ class Camera():
         y = self.target.rect.top - self.height//2
         y = min(-self.height + self.level_manager.current_level.height, max(0, y))
 
+        # Область камери та оновлення об'єктів
         self.camera = pygame.Rect(x, y, self.width, self.height)
+        self.update_area = pygame.Rect(x-self.width*0.2, y-self.height*0.2, self.width*1.4, self.height*1.4)
+
 
     # Повертає об'єкт зі застосованим оффсетом
     def apply_offset(self, rect):
@@ -49,6 +51,4 @@ class Camera():
     # Відмальовує гру з цілю в центрі
     def draw(self, surface):
         self.level_manager.current_level.draw(surface, self.apply_offset)
-        # for object in self.objects:
-        #     object.draw(surface, self.apply_offset)
         self.target.draw(surface, self.apply_offset)

@@ -1,6 +1,8 @@
 # Імпорт матеріалів з скриптів
 from .user_interface import Image # клас для легшої роботи з зображенням
 from .npc import NPC
+from .enemies import Enemy
+from .portal import Portal
 import pygame
 import os
 import json
@@ -45,6 +47,8 @@ class Level():
         # Список блоків рівня
         self.level = []
         self.npcs = []
+        self.enemies = []
+        self.portals = []
 
         self.player = player
         self.level_manager = level_manager
@@ -56,12 +60,13 @@ class Level():
         # Конфіг(параметри) створення рівня і схема рівня
         self.level_config = self.level_file.split("//")[0]
         self.level_config = json.loads("".join(self.level_config.split()))
-        self.level_scheme = self.level_file.split("//")[1]
+        self.level_scheme = self.level_file.split("//")[1].strip()
 
         # Конфіг створення NPC
         self.npcs_config = self.level_config["npcs_config"]
-
+        self.enemies_config = self.level_config["enemies_config"]
         self.blocks_config = self.level_config["blocks_config"]
+        self.portals_config = self.level_config["portals_config"]
 
         # Ширина та висота одного блока
         self.block_width, self.block_height = self.block_size = tuple(self.level_config["blocks_config"]["block_size"])
@@ -76,6 +81,9 @@ class Level():
     def load_level(self):
         self.level = []
         self.npcs = []
+        self.enemies = []
+        self.portals = []
+
         # y - індекс який представляє y, row - строка файлу
         for y, row in enumerate(self.level_scheme.splitlines()):
             # X - індекс який представляє x, symbol - символ
@@ -85,19 +93,60 @@ class Level():
                     self.level.append(Block(position=(x*self.block_width, y*self.block_height), size=self.block_size,
                                             path_to_image=self.blocks_config[symbol]))
                     
+                elif symbol in self.enemies_config:
+                    enemy = self.enemies_config[symbol]
+                    self.enemies.append(
+                        Enemy(
+                            position=(x*self.block_width, y*self.block_height), size=tuple(self.enemies_config["enemy_size"]), damage=enemy["damage"], health=enemy["health"], attack_recharge_time=enemy["attack_recharge"], animation_time=enemy["animation_time"], FOV_width=enemy["FOV_width"],level_manager=self.level_manager, player=self.player, **enemy["animations"]
+                        )
+                    )
+
                 elif symbol in self.npcs_config:
                     npc = self.npcs_config[symbol]
                     self.npcs.append(
                         NPC(
-                            position=(x*self.block_width, y*self.block_height), size=tuple(self.npcs_config["npc_size"]), animation_time=npc["animation_time"], animation_sprite_size=npc["animation_sprite_size"],level_manager=self.level_manager, player=self.player, path_to_phrases=npc["path_to_phrases"], **npc["animations"]
+                            position=(x*self.block_width, y*self.block_height), size=tuple(self.npcs_config["npc_size"]), animation_time=npc["animation_time"],level_manager=self.level_manager, player=self.player, path_to_phrases=npc["path_to_phrases"], **npc["animations"]
                         )
                     )
 
+                elif symbol in self.portals_config:
+                    portal = self.portals_config[symbol]
+
+                    self.portals.append(
+                        Portal(
+                            position=(x*self.block_width, y*self.block_height), size=tuple(self.portals_config["portal_size"]),
+                            animation_time=10, level_manager=self.level_manager, player=self.player, level_destination=portal["level_destination"], texture = {"path": portal["texture"], "animation_time": 1, "sprite_size": portal["texture_size"]}
+                        )
+                    )
+
+ 
                 elif symbol == self.level_config["player"]:
                     self.player.rect.topleft = x*self.block_width, y*self.block_height
 
     def is_on_surface(self, surface, object, offset=lambda rect: rect):
         return surface.get_rect().colliderect(offset(object.rect))
+    
+    def update(self, delta, offset):
+        for enemy in self.enemies:
+            # if self.is_on_update_area(update_area, enemy, offset):
+            enemy.x_direction = 0
+            if not enemy.is_attacking:
+                enemy.move_to_player(offset)
+            enemy.update(delta)
+
+
+            if enemy.health <= 0:
+                self.enemies.remove(enemy)
+
+                self.player.increase_health(1)
+                self.player.increase_damage(0.5)
+
+            if enemy.is_attacking: 
+                enemy.attack()
+
+        for npc in self.npcs:
+            # if self.is_on_update_area(update_area, npc, offset):
+            npc.update_dialoge_elements()
 
     # Відмальовка рівня
     def draw(self, surface, offset):
@@ -105,10 +154,21 @@ class Level():
         for block in self.level:
             if self.is_on_surface(surface, block, offset):
                 block.draw(surface, offset)
+
+        if self.enemies == []:
+            for portal in self.portals:
+                if self.is_on_surface(surface, portal, offset):
+                    portal.draw(surface, offset)
         
         for npc in self.npcs:
             if self.is_on_surface(surface, npc, offset):
                 npc.draw(surface, offset)
+
+        for enemy in self.enemies:
+            if self.is_on_surface(surface, enemy, offset):
+                enemy.draw(surface, offset)
+
+
 
 # Клас для контролю рівнями
 class LevelManager():

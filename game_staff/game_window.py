@@ -1,8 +1,10 @@
 # Імпорт зі скрипту screens.py екрани Меню та для тестів
-from .screens import MenuScreen, GameScreen, PauseScreen
+from .screens import MenuScreen, GameScreen, PauseScreen, SettingScreen, AuthorsScreen, AboutScreen, DeadScreen
+from .game_config import GameConfig
 import pygame
 pygame.init()
 
+config = GameConfig()
 
 # Вікно гри
 class GameWindow():
@@ -17,19 +19,43 @@ class GameWindow():
         self.FPS = framerate
         self.delta = 0
 
+        loading = pygame.font.Font(None, 100).render("Завантажується...", True, (235, 235, 235))
+        self.window_surface.blit(loading, (window_size[0]/2 - loading.get_width()/2, window_size[1]/2 - loading.get_height()/2))
+        self.update_window()
+
         # Створення екранів меню та тестового
-        self.game_screen = GameScreen(self)
         self.pause_screen = PauseScreen(self)
+        self.dead_screen = DeadScreen(self)
+        self.game_screen = GameScreen(self)
+        self.setting_screen = SettingScreen(self)
+        self.about_screen = AboutScreen(self)
+        self.authors_screen = AuthorsScreen(self)
         self.menu_screen = MenuScreen(self)
-
-        # # Додання події до кнопки в екрані меню для переходу на тестовий екран
-        # self.menu_screen.button.add_action(self.test_screen.set_screen)
-
+        
         # Поточний екран
         self.current_screen = self.menu_screen
 
         # Змінна, яка відображає стан вікна
         self.open = True
+
+    def restart_game(self):
+        player_health = self.game_screen.player.health
+        config.load_progress("new_game.json")
+
+        self.dead_screen = DeadScreen(self)
+        self.pause_screen = PauseScreen(self)
+        self.game_screen = GameScreen(self)
+        if player_health <= 0:
+            self.dead_screen.set_screen()
+        else:
+            self.game_screen.set_screen()
+        self.setting_screen = SettingScreen(self)
+        self.about_screen = AboutScreen(self)
+        self.authors_screen = AuthorsScreen(self)
+        self.menu_screen = MenuScreen(self)
+
+        
+        
 
     # Закриття вікна
     def close(self):

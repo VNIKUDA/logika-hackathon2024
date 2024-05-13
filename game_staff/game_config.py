@@ -1,3 +1,6 @@
+import json
+import pygame
+
 # Клас який зберігає налаштування гри під час робити програми
 class GameConfig():
     _instance = None # зберігає єдиний створений екземпляр цього класу
@@ -12,9 +15,16 @@ class GameConfig():
         if cls._instance == None:
             cls._instance = super().__new__(cls)
             cls._instance.set_window_size(0, 0)
+            cls._instance.controls_type = "A, D, SPACE"
+            cls._instance.controls = {
+                "Left": pygame.K_a,
+                "Right": pygame.K_d,
+                "Jump": pygame.K_SPACE
+            }
+            cls._instance.game_data = {}
 
         return cls._instance
-    
+        
     # Встановлює розмір вікна
     def set_window_size(self, width, height):
         # width - ширина вікна
@@ -26,3 +36,34 @@ class GameConfig():
     # Повератає розмір вікна
     def get_window_size(self):
         return self.window_width, self.window_height
+    
+    def load_progress(self, file):
+        with open(file, "r") as file:
+            self.game_data = json.load(file)
+
+    def load_config(self, file):
+        with open(file, "r") as file:
+            self.game_data = json.load(file)
+
+        self.controls_type = self.game_data["controls"]
+        if self.game_data["controls"] == "Arrows":
+            self.controls = {
+                "Left": pygame.K_LEFT,
+                "Right": pygame.K_RIGHT,
+                "Jump": pygame.K_UP
+            }
+
+    def save_config(self, file, game_screen):
+        data = {}
+
+        player = game_screen.player
+        data["player_max_health"] = player.max_health
+        data["player_health"] = player.health
+        data["player_damage_bonus"] = player.damage_bonus
+        data["controls"] = self.controls_type
+
+        level_manager = game_screen.level_manager
+        data["level_name"] = [name for name, level in level_manager.levels.items() if level == level_manager.current_level][0]
+
+        with open(file, "w") as file:
+            json.dump(data, file)
