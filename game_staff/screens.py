@@ -76,7 +76,7 @@ class MenuScreen(Screen):
         # Створення фону
         self.background = Image(path_to_image="game_assets\\images\\main_art.png", size=config.get_window_size())
 
-        # Кнопки для старту гри та виходу з програми
+        # Кнопки для старту гри, 
         w, h = config.get_window_size()
         self.start_button = Button(path_to_image="game_assets\\images\\ГРАТИ.png", size=(175, 70), position=(50, h*0.55-80), rotation=0)
         self.setting_button = Button(path_to_image="game_assets\\images\\НАЛАШТУВАННЯ.png", size=(420, 70), position=(50, h*0.55 + 80), rotation=0)

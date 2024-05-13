@@ -1,5 +1,5 @@
 {
-    "path_to_background": "game_assets\\images\\background.png",
+    "path_to_background": "game_assets\\images\\thanks.png",
     "player": "P",
 
     "npcs_config":
@@ -42,7 +42,7 @@
     "blocks_config": 
     {
         "block_size": [100, 100],
-        "B": "game_assets\\images\\block.png"
+        "B": "game_assets\\images\\nothing.png"
     },
 
     "portals_config":
@@ -56,6 +56,6 @@ B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B
 B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B 
 B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B 
 B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B  
-B  P  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B  
+B  .  .  .  .  .  .  .  .  P  .  .  .  .  .  .  .  B  
 B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B  
 B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  

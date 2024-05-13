@@ -13,7 +13,7 @@ config = GameConfig()
 config.set_window_size(*window_size)
 
 # Створення ігрового вікна
-window = GameWindow(window_size=window_size, title="dead cells (parody)", flags=pygame.SRCALPHA)
+window = GameWindow(window_size=window_size, title="dead prison", flags=pygame.SRCALPHA)
 
 # Головний ігровий цикл
 while window.open:

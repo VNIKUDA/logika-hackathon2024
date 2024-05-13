@@ -30,7 +30,7 @@
         "e": 
         {
             "health": 40,
-            "FOV_width": 400,
+            "FOV_width": 1200,
             "attack_recharge": 30,
             "animation_time": 15,
             "animations":
