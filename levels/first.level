@@ -1,0 +1,67 @@
+{
+    "path_to_background": "game_assets\\images\\background.png",
+    "player": "P",
+
+    "npcs_config":
+    {
+        "npc_size": [100, 200],
+        "N":
+        {
+            "path_to_phrases": "phrases\\first.json",
+            "animation_time": 100,
+            "animations":
+            {
+                "idle": {"path": "game_assets\\images\\npc.png",
+                         "sprite_size": 72}
+            }
+        }
+    },
+
+    "enemies_config": 
+    {
+        "enemy_size": [100, 200],
+        "E": 
+        {
+            "health": 20,
+            "FOV_width": 400,
+            "attack_recharge": 100,
+            "animation_time": 15,
+            "animations":
+            {
+                "idle": {"path": "game_assets\\images\\normenemy.png",
+                         "sprite_size": 217},
+                "run": {"path": "game_assets\\images\\enemy_run.png",
+                         "sprite_size": 178},
+                "attack": {"path": "game_assets\\images\\enemy_attack.png",
+                           "sprite_size": 217}
+            },
+            "damage": 3
+        }
+    },
+
+    "blocks_config": 
+    {
+        "block_size": [100, 100],
+        "B": "game_assets\\images\\block.png"
+    },
+
+    "portals_config":
+    {
+        "portal_size": [150, 200],
+        "p":
+        {
+            "texture": "game_assets\\images\\portal.png",
+            "texture_size": 465,
+            "level_destination": "second"
+        }
+    }
+}
+//
+B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B
+B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B 
+B  .  P  .  .  .  E  .  .  .  .  .  .  .  .  .  .  .  .  B 
+B  .  .  .  .  .  .  .  .  .  E  .  .  .  .  .  .  .  .  B 
+B  B  B  B  B  B  B  .  .  .  .  .  .  .  .  .  .  .  .  B  
+B  .  .  .  .  .  .  B  B  B  B  B  .  .  .  N  .  .  p  B  
+B  .  .  .  .  .  .  .  .  .  .  .  B  B  .  .  .  .  .  B  
+B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B

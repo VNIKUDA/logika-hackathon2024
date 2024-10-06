@@ -1,0 +1,57 @@
+{
+    "path_to_background": "game_assets\\images\\background.png",
+    "player": "P",
+
+    "npcs_config":
+    {
+        "npc_size": [100, 200]
+    },
+
+    "enemies_config": 
+    {
+        "enemy_size": [200, 400],
+        "E": 
+        {
+            "health": 80,
+            "FOV_width": 1400,
+            "attack_recharge": 300,
+            "animation_time": 15,
+            "animations":
+            {
+                "idle": {"path": "game_assets\\images\\normenemy.png",
+                         "sprite_size": 217},
+                "run": {"path": "game_assets\\images\\enemy_run.png",
+                         "sprite_size": 178},
+                "attack": {"path": "game_assets\\images\\enemy_attack.png",
+                           "sprite_size": 217}
+            },
+            "damage": 15
+        }
+    },
+
+    "blocks_config": 
+    {
+        "block_size": [100, 100],
+        "B": "game_assets\\images\\block.png"
+    },
+
+    "portals_config":
+    {
+        "portal_size": [150, 200],
+        "p":
+        {
+            "texture": "game_assets\\images\\portal.png",
+            "texture_size": 465,
+            "level_destination": "afterboss"
+        }
+    }
+}
+//
+B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B
+B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B 
+B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B 
+B  .  .  .  .  .  .  .  .  E  .  .  .  .  .  .  .  B 
+B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B  
+B  P  .  .  .  .  .  .  .  .  .  .  .  .  .  .  p  B  
+B  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B  
+B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  B  
